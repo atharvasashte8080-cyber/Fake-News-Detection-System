@@ -4,7 +4,7 @@ import random
 
 app = Flask(__name__)
 
-DB_URI = "postgresql://postgres:atharva%40123@db.oqwjmftcltvzuvwpbfpv.supabase.co:5432/postgres"
+DB_URI = "postgresql://postgres:Atharva%40123@db.oqwjmftcltvzuvwpbfpv.supabase.co:5432/postgres"
 
 @app.route('/')
 def login():
@@ -53,6 +53,16 @@ def analyze():
         "confidence": confidence, 
         "db_status": db_status
     })
+
+def test_connection():
+    try:
+        conn = psycopg2.connect(DB_URI)
+        print("✅ DATABASE CONNECTED SUCCESSFULLY!")
+        conn.close()
+    except Exception as e:
+        print(f"❌ DATABASE CONNECTION FAILED: {e}")
+
+test_connection()
 
 if __name__ == '__main__':
     app.run(debug=True)
