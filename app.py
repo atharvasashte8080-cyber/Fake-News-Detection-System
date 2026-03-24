@@ -5,7 +5,7 @@ import random
 app = Flask(__name__)
 
 # The port MUST be 6543 for the Shared Pooler
-DB_URI = "postgresql://postgres.oqwjmftcltvzuvwpbfpv:Atharva%40123@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres?sslmode=require"
+DB_URI = "postgresql://postgres.oqwjmftcltvzuvwpbfpv:Atharva%40123@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres?sslmode=require"
 
 def test_insert():
     try:
