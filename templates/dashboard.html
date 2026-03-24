@@ -210,14 +210,19 @@
 
     async function processNews() {
     const input = document.getElementById('newsInput').value;
-    if (input.length < 20) { alert("Please enter more text."); return; }
-
-    // 1. Send data to your Python Backend (Flask)
+    
+    // This part is the "Bridge" to your Database
     const response = await fetch('/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: input })
     });
+
+    const data = await response.json();
+    console.log(data.db_status); // Check your console to see if it says "Saved"
+    
+    // ... update your UI with data.is_fake and data.confidence ...
+}
 
     const data = await response.json();
 
