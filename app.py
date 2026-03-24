@@ -4,7 +4,7 @@ import random
 
 app = Flask(__name__)
 
-DB_URI = "postgresql://postgres:atharva@123@db.oqwjmftcltvzuvwpbfpv.supabase.co:5432/postgres"
+DB_URI = "postgresql://postgres:atharva%40123@db.oqwjmftcltvzuvwpbfpv.supabase.co:5432/postgres"
 
 @app.route('/')
 def login():
