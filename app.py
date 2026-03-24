@@ -7,6 +7,18 @@ app = Flask(__name__)
 # The port MUST be 6543 for the Shared Pooler
 DB_URI = "postgresql://postgres.oqwjmftcltvzuvwpbfpv:Atharva%40123@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres?sslmode=require"
 
+def test_insert():
+    try:
+        conn = psycopg2.connect(DB_URI)
+        cur = conn.cursor()
+        cur.execute("INSERT INTO public.news_history (content, verdict, confidence) VALUES ('hello', 'Fake', 90)")
+        conn.commit()
+        print("✅ INSERT WORKED")
+    except Exception as e:
+        print("❌ ERROR:", e)
+
+test_insert()
+
 @app.route('/')
 def login():
     return render_template('index.html') # This is your Login page
@@ -25,8 +37,11 @@ def contact():
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
-    data = request.json
-    news_text = data.get('text')
+    data = request.get_json(force=True)
+    news_text = data.get('text', '')
+
+    print("🔥 /analyze route hit")
+    print("Incoming data:", data)
 
     # 1. ML Logic Simulation (You can replace this with your actual model later)
     red_flags = ["slapped", "conspiracy", "secret", "exposed", "modi"]
@@ -39,14 +54,15 @@ def analyze():
         conn = psycopg2.connect(DB_URI)
         cur = conn.cursor()
         cur.execute(
-            "INSERT INTO news_history (content, verdict, confidence) VALUES (%s, %s, %s)",
-            (news_text, verdict, confidence)
-        )
+    "INSERT INTO public.news_history (content, verdict, confidence) VALUES (%s, %s, %s)",
+    (news_text, verdict, confidence)
+)
         conn.commit()
         cur.close()
         conn.close()
         db_status = "Saved to Cloud DB"
     except Exception as e:
+        print("❌ DB ERROR:", e)
         db_status = f"DB Error: {e}"
 
     return jsonify({
