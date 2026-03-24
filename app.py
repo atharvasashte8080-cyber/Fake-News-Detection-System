@@ -4,7 +4,8 @@ import random
 
 app = Flask(__name__)
 
-DB_URI = "postgresql://postgres:Atharva%40123@db.oqwjmftcltvzuvwpbfpv.supabase.co:5432/postgres?sslmode=require"
+# The port MUST be 6543 for the Shared Pooler
+DB_URI = "postgresql://postgres.oqwjmftcltvzuvwpbfpv:Atharva%40123@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres?sslmode=require"
 
 @app.route('/')
 def login():
