@@ -4,7 +4,7 @@ import random
 
 app = Flask(__name__)
 
-DB_URI = "your_supabase_connection_uri_here"
+DB_URI = "postgresql://postgres:atharva@123@db.oqwjmftcltvzuvwpbfpv.supabase.co:5432/postgres"
 
 @app.route('/')
 def index():
