@@ -208,39 +208,29 @@
     <script>
         const historyData = [];
 
-        function processNews() {
-            const input = document.getElementById('newsInput').value;
-            const btn = document.getElementById('analyzeBtn');
-            const loader = document.getElementById('btnLoader');
-            const btnText = document.getElementById('btnText');
+    async function processNews() {
+    const input = document.getElementById('newsInput').value;
+    if (input.length < 20) { alert("Please enter more text."); return; }
 
-            if (input.trim().length < 20) {
-                alert("Please paste a longer text for accurate pattern analysis.");
-                return;
-            }
+    // 1. Send data to your Python Backend (Flask)
+    const response = await fetch('/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: input })
+    });
 
-            loader.style.display = "inline-block";
-            btnText.innerText = "Computing Vectors...";
-            btn.disabled = true;
+    const data = await response.json();
 
-            setTimeout(() => {
-                // DEMO LOGIC: High-impact keywords for testing
-                const fakeKeywords = ["slapped", "conspiracy", "secret", "modi", "exposed", "scandal", "shocking"];
-                let isFake = Math.random() < 0.5;
-
-                // Pattern Match Simulation
-                if (fakeKeywords.some(word => input.toLowerCase().includes(word))) {
-                    isFake = true;
-                }
-
-                const confidence = Math.floor(Math.random() * (98 - 75 + 1) + 75);
-                displayResults(isFake, confidence, input);
-
-                loader.style.display = "none";
-                btnText.innerText = "Run NLP Analysis";
-                btn.disabled = false;
-            }, 1500);
-        }
+    // 2. Display the results returned from Python/Postgres
+    document.getElementById('resultArea').style.display = "block";
+    document.getElementById('finalVerdict').innerText = data.is_fake ? "🚨 LIKELY FAKE" : "✅ LIKELY REAL";
+    document.getElementById('finalVerdict').className = data.is_fake ? "text-danger fw-bold" : "text-success fw-bold";
+    
+    const bar = document.getElementById('confidenceBar');
+    bar.style.width = data.confidence + "%";
+    bar.innerText = data.confidence + "%";
+    bar.className = data.is_fake ? "progress-bar bg-danger" : "progress-bar bg-success";
+}
 
         function displayResults(isFake, confidence, text) {
             document.getElementById('resultArea').style.display = "block";
