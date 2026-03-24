@@ -7,17 +7,17 @@ app = Flask(__name__)
 # The port MUST be 6543 for the Shared Pooler
 DB_URI = "postgresql://postgres.oqwjmftcltvzuvwpbfpv:Atharva%40123@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres?sslmode=require"
 
-def test_insert():
-    try:
-        conn = psycopg2.connect(DB_URI)
-        cur = conn.cursor()
-        cur.execute("INSERT INTO public.news_history (content, verdict, confidence) VALUES ('hello', 'Fake', 90)")
-        conn.commit()
-        print("✅ INSERT WORKED")
-    except Exception as e:
-        print("❌ ERROR:", e)
+# def test_insert():
+#     try:
+#         conn = psycopg2.connect(DB_URI)
+#         cur = conn.cursor()
+#         cur.execute("INSERT INTO public.news_history (content, verdict, confidence) VALUES ('hello', 'Fake', 90)")
+#         conn.commit()
+#         print("✅ INSERT WORKED")
+#     except Exception as e:
+#         print("❌ ERROR:", e)
 
-test_insert()
+# test_insert()
 
 @app.route('/')
 def login():
@@ -71,15 +71,15 @@ def analyze():
         "db_status": db_status
     })
 
-# def test_connection():
-#     try:
-#         conn = psycopg2.connect(DB_URI)
-#         print("✅ DATABASE CONNECTED SUCCESSFULLY!")
-#         conn.close()
-#     except Exception as e:
-#         print(f"❌ DATABASE CONNECTION FAILED: {e}")
+def test_connection():
+    try:
+        conn = psycopg2.connect(DB_URI)
+        print("✅ DATABASE CONNECTED SUCCESSFULLY!")
+        conn.close()
+    except Exception as e:
+        print(f"❌ DATABASE CONNECTION FAILED: {e}")
 
-# test_connection()
+test_connection()
 
 if __name__ == '__main__':
     app.run(debug=True)
