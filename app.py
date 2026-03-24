@@ -71,15 +71,15 @@ def analyze():
         "db_status": db_status
     })
 
-def test_connection():
-    try:
-        conn = psycopg2.connect(DB_URI)
-        print("✅ DATABASE CONNECTED SUCCESSFULLY!")
-        conn.close()
-    except Exception as e:
-        print(f"❌ DATABASE CONNECTION FAILED: {e}")
+# def test_connection():
+#     try:
+#         conn = psycopg2.connect(DB_URI)
+#         print("✅ DATABASE CONNECTED SUCCESSFULLY!")
+#         conn.close()
+#     except Exception as e:
+#         print(f"❌ DATABASE CONNECTION FAILED: {e}")
 
-test_connection()
+# test_connection()
 
 if __name__ == '__main__':
     app.run(debug=True)
