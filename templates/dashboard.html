@@ -206,91 +206,115 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        const historyData = [];
+const historyData = [];
 
     async function processNews() {
-    const input = document.getElementById('newsInput').value;
-    
-    // This part is the "Bridge" to your Database
-    const response = await fetch('/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: input })
-    });
+        const inputField = document.getElementById('newsInput');
+        const btn = document.getElementById('analyzeBtn');
+        const btnText = document.getElementById('btnText');
+        const loader = document.getElementById('btnLoader');
+        const text = inputField.value;
 
-    const data = await response.json();
-    console.log(data.db_status); // Check your console to see if it says "Saved"
-    
-    // ... update your UI with data.is_fake and data.confidence ...
-}
+        if (text.length < 10) {
+            alert("Please enter at least a short sentence.");
+            return;
+        }
 
-    const data = await response.json();
+        // Show Loading State
+        btn.disabled = true;
+        loader.style.display = "inline-block";
+        btnText.innerText = "Analyzing...";
 
-    // 2. Display the results returned from Python/Postgres
-    document.getElementById('resultArea').style.display = "block";
-    document.getElementById('finalVerdict').innerText = data.is_fake ? "🚨 LIKELY FAKE" : "✅ LIKELY REAL";
-    document.getElementById('finalVerdict').className = data.is_fake ? "text-danger fw-bold" : "text-success fw-bold";
-    
-    const bar = document.getElementById('confidenceBar');
-    bar.style.width = data.confidence + "%";
-    bar.innerText = data.confidence + "%";
-    bar.className = data.is_fake ? "progress-bar bg-danger" : "progress-bar bg-success";
-}
+        try {
+            // 1. CALL THE PYTHON BACKEND
+            const response = await fetch('/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            });
 
-        function displayResults(isFake, confidence, text) {
-            document.getElementById('resultArea').style.display = "block";
-            const verdict = document.getElementById('finalVerdict');
-            const bar = document.getElementById('confidenceBar');
-            const indicators = document.getElementById('indicators');
-            const sentLabel = document.getElementById('sentLabel');
-            const sentMeter = document.getElementById('sentMeter');
-            const sourceLabel = document.getElementById('sourceLabel');
+            if (!response.ok) throw new Error('Network response was not ok');
 
-            if (isFake) {
-                verdict.innerText = "🚨 LIKELY FAKE";
-                verdict.className = "fw-bold text-danger";
-                bar.className = "progress-bar bg-danger";
-                sentLabel.innerText = "Sensationalist/Subjective Tone";
-                sentMeter.style.borderLeftColor = "#dc3545";
-                sourceLabel.innerText = "Low-Credibility Patterns Found";
-                indicators.innerHTML = `
+            const data = await response.json();
+            console.log("Database Status:", data.db_status);
+
+            // 2. DISPLAY RESULTS
+            displayResults(data.is_fake, data.confidence, text);
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert("Connection error. Is your Flask server running?");
+        } finally {
+            // Reset Button
+            btn.disabled = false;
+            loader.style.display = "none";
+            btnText.innerText = "Run NLP Analysis";
+        }
+    }
+
+    function displayResults(isFake, confidence, text) {
+        document.getElementById('resultArea').style.display = "block";
+        const verdict = document.getElementById('finalVerdict');
+        const bar = document.getElementById('confidenceBar');
+        const indicators = document.getElementById('indicators');
+        const sentLabel = document.getElementById('sentLabel');
+        const sentMeter = document.getElementById('sentMeter');
+        const sourceLabel = document.getElementById('sourceLabel');
+
+        if (isFake) {
+            verdict.innerText = "🚨 LIKELY FAKE";
+            verdict.className = "fw-bold text-danger";
+            bar.className = "progress-bar progress-bar-striped progress-bar-animated bg-danger";
+            sentLabel.innerText = "Sensationalist/Subjective Tone";
+            sentMeter.style.borderLeftColor = "#dc3545";
+            sourceLabel.innerText = "Low-Credibility Patterns Found";
+            indicators.innerHTML = `
                 <span class="badge bg-warning text-dark me-1 badge-custom">Emotional Bias</span>
                 <span class="badge bg-danger me-1 badge-custom">Linguistic Red-Flag</span>
             `;
-            } else {
-                verdict.innerText = "✅ LIKELY REAL";
-                verdict.className = "fw-bold text-success";
-                bar.className = "progress-bar bg-success";
-                sentLabel.innerText = "Neutral and Informative";
-                sentMeter.style.borderLeftColor = "#198754";
-                sourceLabel.innerText = "Objective Tone Detected";
-                indicators.innerHTML = `
+        } else {
+            verdict.innerText = "✅ LIKELY REAL";
+            verdict.className = "fw-bold text-success";
+            bar.className = "progress-bar progress-bar-striped progress-bar-animated bg-success";
+            sentLabel.innerText = "Neutral and Informative";
+            sentMeter.style.borderLeftColor = "#198754";
+            sourceLabel.innerText = "Objective Tone Detected";
+            indicators.innerHTML = `
                 <span class="badge bg-info text-dark me-1 badge-custom">Neutral Syntax</span>
                 <span class="badge bg-primary me-1 badge-custom">Verifiable Style</span>
             `;
-            }
-
-            bar.style.width = confidence + "%";
-            bar.innerText = confidence + "%";
-
-            updateHistory(text.substring(0, 30) + "...", isFake ? "Fake" : "Real");
         }
 
-        function updateHistory(snippet, result) {
-            const tbody = document.getElementById('historyBody');
-            if (historyData.length === 0) tbody.innerHTML = "";
+        bar.style.width = confidence + "%";
+        bar.innerText = confidence + "%";
 
-            historyData.unshift({ snippet, result });
-            const badgeClass = result === "Fake" ? "bg-danger" : "bg-success";
+        // Update the visual history log
+        updateHistory(text.substring(0, 30) + "...", isFake ? "Fake" : "Real");
+    }
 
-            const row = `<tr>
+    function updateHistory(snippet, result) {
+        const tbody = document.getElementById('historyBody');
+        
+        // Clear "No history" message on first entry
+        if (historyData.length === 0) tbody.innerHTML = "";
+
+        historyData.unshift({ snippet, result });
+        const badgeClass = result === "Fake" ? "bg-danger" : "bg-success";
+
+        const row = `<tr>
             <td>${snippet}</td>
             <td><span class="badge ${badgeClass}">${result}</span></td>
         </tr>`;
 
-            tbody.innerHTML = row + tbody.innerHTML;
-            if (historyData.length > 5) historyData.pop();
+        // Update table UI
+        tbody.innerHTML = row + tbody.innerHTML;
+        
+        // Keep only last 5 entries in UI
+        if (historyData.length > 5) {
+            historyData.pop();
+            tbody.removeChild(tbody.lastChild);
         }
+    }
     </script>
 
     <footer class="bg-white border-top py-4 mt-5">
